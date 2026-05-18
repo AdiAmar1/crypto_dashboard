@@ -3,7 +3,7 @@ import MarketNews from './components/MarketNews'
 import CoinPrices from './components/CoinPrices'
 import DailyInsights from './components/DailyInsights'
 import FunMeme from './components/FunMeme'
-import { useUserPreferences } from './hooks/useUserPreferences'
+import { useUserData } from './hooks/useUserData'
 import type { WidgetPreference } from './types/widgetPreference'
 
 const WIDGET_COMPONENTS: Record<
@@ -17,7 +17,7 @@ const WIDGET_COMPONENTS: Record<
 }
 
 const App = () => {
-  const { data: preferences, isLoading } = useUserPreferences()
+  const { data: user, isLoading } = useUserData()
 
   if (isLoading) {
     return (
@@ -33,7 +33,7 @@ const App = () => {
   return (
     <main className="dashboard">
       <div className="dashboard-grid">
-        {preferences?.map((preference) => {
+        {user?.preferences.map((preference) => {
           const Widget = WIDGET_COMPONENTS[preference]
           return <Widget key={preference} />
         })}
