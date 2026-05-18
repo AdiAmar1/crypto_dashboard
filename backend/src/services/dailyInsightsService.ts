@@ -1,3 +1,4 @@
+import { FRONTEND_ORIGIN } from '../config/app.js'
 import {
   OPENROUTER_API_KEY,
   OPENROUTER_BASE_URL,
@@ -68,7 +69,7 @@ export async function getDailyInsights(
     headers: {
       Authorization: `Bearer ${OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'http://localhost:5173',
+      'HTTP-Referer': FRONTEND_ORIGIN,
       'X-Title': 'Crypto Dashboard',
     },
     body: JSON.stringify(body),

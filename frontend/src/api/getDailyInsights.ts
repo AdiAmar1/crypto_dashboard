@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config/api'
 import { fetchApi } from './fetchApi'
 import type { DailyInsightsResult } from '../types/dailyInsights'
 
@@ -6,7 +7,7 @@ export async function getDailyInsights(
 ): Promise<DailyInsightsResult> {
   const ids = coins.join(',')
   const response = await fetchApi(
-    `http://localhost:3000/api/insights?coins=${encodeURIComponent(ids)}`,
+    `${API_BASE_URL}/api/insights?coins=${encodeURIComponent(ids)}`,
   )
 
   if (!response.ok) {

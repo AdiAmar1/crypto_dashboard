@@ -10,11 +10,12 @@ import marketNewsRoutes from './routes/marketNewsRoutes.js'
 import userRoutes, { protectedUserRoutes } from './routes/userRoutes.js'
 import voteRoutes from './routes/voteRoutes.js'
 import { authMiddleware } from './middleware/authMiddleware.js'
+import { FRONTEND_ORIGIN, PORT, SERVER_ORIGIN } from './config/app.js'
 
 const app = express()
-const port = 3000
+const port = PORT
 
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173'
+const frontendOrigin = FRONTEND_ORIGIN
 const sessionSecret = process.env.SESSION_SECRET ?? 'dev-session-secret'
 
 app.use(
@@ -52,7 +53,7 @@ async function startServer(): Promise<void> {
   const server = app.listen(port)
 
   server.on('listening', () => {
-    console.log(`Server is running on http://localhost:${port}`)
+    console.log(`Server is running on ${SERVER_ORIGIN}`)
   })
 
   server.on('error', (err: NodeJS.ErrnoException) => {

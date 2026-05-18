@@ -1,8 +1,9 @@
+import { API_BASE_URL } from '../config/api'
 import { fetchApi } from './fetchApi'
 import type { VoteRequest, VoteResponse } from '../types/vote'
 
 export async function postVote(body: VoteRequest): Promise<VoteResponse> {
-  const response = await fetchApi('http://localhost:3000/api/votes', {
+  const response = await fetchApi(`${API_BASE_URL}/api/votes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

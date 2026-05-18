@@ -1,9 +1,10 @@
+import { API_BASE_URL } from '../config/api'
 import { fetchApi } from './fetchApi'
 import type { LoginRequest } from '../types/auth'
 import type { User } from '../types/user'
 
 export async function postLogin(body: LoginRequest): Promise<User> {
-  const response = await fetchApi('http://localhost:3000/api/user/login', {
+  const response = await fetchApi(`${API_BASE_URL}/api/user/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

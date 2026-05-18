@@ -1,10 +1,11 @@
+import { API_BASE_URL } from '../config/api'
 import { fetchApi } from './fetchApi'
 import type { MarketNewsResult } from '../types/marketNews'
 
 export async function getMarketNews(coins: string[]): Promise<MarketNewsResult> {
   const q = coins.join(',')
   const response = await fetchApi(
-    `http://localhost:3000/api/news/crypto?q=${encodeURIComponent(q)}`,
+    `${API_BASE_URL}/api/news/crypto?q=${encodeURIComponent(q)}`,
   )
 
   if (!response.ok) {

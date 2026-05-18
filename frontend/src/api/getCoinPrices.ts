@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config/api'
 import { fetchApi } from './fetchApi'
 import type { CoinPricesResult } from '../types/coinPrice'
 
@@ -6,7 +7,7 @@ export async function getCoinPrices(
 ): Promise<CoinPricesResult> {
   const ids = coins.join(',')
   const response = await fetchApi(
-    `http://localhost:3000/api/coins/prices?ids=${encodeURIComponent(ids)}`,
+    `${API_BASE_URL}/api/coins/prices?ids=${encodeURIComponent(ids)}`,
   )
 
   if (!response.ok) {
