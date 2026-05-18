@@ -65,6 +65,7 @@ const CoinPricesChart = ({ coins }: CoinPricesChartProps) => {
         getValue: (datum) => datum.marketCap,
         elementType: 'bar',
         position: 'bottom',
+        min: 0,
         showGrid: true,
         formatters: {
           scale: (value: number) => formatUsdCompact(value),

@@ -48,6 +48,15 @@ const App = () => {
             )
           }
 
+          if (preference === 'MARKET_NEWS') {
+            return (
+              <MarketNews
+                key={preference}
+                coins={user.preferences.coins}
+              />
+            )
+          }
+
           const Widget = WIDGET_COMPONENTS[preference]
           return <Widget key={preference} />
         })}
