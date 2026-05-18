@@ -1,10 +1,39 @@
+import { useFunMeme } from '../../hooks/useFunMeme'
 import styles from './FunMeme.module.css'
 
 const FunMeme = () => {
+  const { data, isLoading, isError, error } = useFunMeme()
+
   return (
     <section className={styles.container}>
-      <h2 className={styles.title}>Fun Meme</h2>
-      <p className={styles.placeholder}>A fun crypto meme will appear here.</p>
+      <header className={styles.header}>
+        <h2 className={styles.title}>Fun Meme</h2>
+        <p className={styles.subtitle}>A random crypto meme for your day</p>
+      </header>
+
+      {isLoading && (
+        <p className={styles.status} role="status" aria-live="polite">
+          Loading meme…
+        </p>
+      )}
+
+      {isError && (
+        <p className={styles.error} role="alert">
+          {error instanceof Error ? error.message : 'Could not load meme'}
+        </p>
+      )}
+
+      {data && (
+        <figure className={styles.figure}>
+          <img
+            className={styles.image}
+            src={data.url}
+            alt="Crypto meme"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      )}
     </section>
   )
 }
