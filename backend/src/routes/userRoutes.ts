@@ -5,7 +5,10 @@ const router = Router()
 
 router.post('/register', userController.register)
 router.post('/login', userController.login)
-router.get('/data', userController.getUserData)
-router.put('/preferences', userController.savePreferences)
+
+export const protectedUserRoutes = Router()
+
+protectedUserRoutes.get('/data', userController.getUserData)
+protectedUserRoutes.put('/preferences', userController.savePreferences)
 
 export default router

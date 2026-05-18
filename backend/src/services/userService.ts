@@ -1,9 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import { UserError } from '../errors/userError.js'
 import * as userStore from '../store/userStore.js'
-import type { RegisterRequest, User, UserPreferences } from '../types/user.js'
+import type {
+  LoginRequest,
+  RegisterRequest,
+  User,
+  UserPreferences,
+} from '../types/user.js'
 import { toPublicUser } from '../types/user.js'
-import { hashPassword } from '../utils/password.js'
+import { hashPassword, verifyPassword } from '../utils/password.js'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
@@ -52,22 +57,36 @@ export async function register(input: RegisterRequest): Promise<User> {
   return toPublicUser(user)
 }
 
-export async function login(): Promise<string> {
-  return 'login'
+function parseLoginInput(input: LoginRequest): LoginRequest {
+  const email =
+    typeof input.email === 'string' ? input.email.trim().toLowerCase() : ''
+  const password = typeof input.password === 'string' ? input.password : ''
+
+  return { email, password }
 }
 
-export async function getUserData(): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, 1000))
+export async function login(input: LoginRequest): Promise<User> {
+  const { email, password } = parseLoginInput(input)
 
-  return {
-    id: '1',
-    name: 'Jane Doe',
-    email: 'jane@example.com',
-    preferences: {
-      widgets: ['MARKET_NEWS', 'COIN_PRICES', 'DAILY_INSIGHTS', 'FUN_MEME'],
-      coins: ['bitcoin'],
-    },
+  if (!email || !password) {
+    throw new UserError('Email and password are required', 400)
   }
+
+  const stored = userStore.findByEmail(email)
+  if (!stored || !verifyPassword(password, stored.passwordHash)) {
+    throw new UserError('Invalid email or password', 401)
+  }
+
+  return toPublicUser(stored)
+}
+
+export async function getUserData(userId: string): Promise<User> {
+  const stored = userStore.findById(userId)
+  if (!stored) {
+    throw new UserError('User not found', 404)
+  }
+
+  return toPublicUser(stored)
 }
 
 export async function savePreferences(

@@ -6,6 +6,8 @@ import App from './App.tsx'
 import { UserProvider } from './contexts/UserContext'
 import RootLayout from './layouts/RootLayout'
 import OnBoarding from './pages/OnBoarding'
+import GuestRoute from './components/GuestRoute'
+import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 
@@ -17,10 +19,14 @@ createRoot(document.getElementById('root')!).render(
       <UserProvider>
         <Routes>
           <Route element={<RootLayout />}>
-            <Route path="/" element={<App />} />
-            <Route path="/onboarding" element={<OnBoarding />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route element={<GuestRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+            </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<App />} />
+              <Route path="/onboarding" element={<OnBoarding />} />
+            </Route>
           </Route>
         </Routes>
       </UserProvider>

@@ -1,10 +1,11 @@
+import { fetchApi } from './fetchApi'
 import type { VoteSnapshotResponse } from '../types/vote'
 
 export async function getVoteSnapshot(
   snapshotId: string,
 ): Promise<VoteSnapshotResponse> {
   const params = new URLSearchParams({ snapshotId })
-  const response = await fetch(
+  const response = await fetchApi(
     `http://localhost:3000/api/votes?${params.toString()}`,
   )
 

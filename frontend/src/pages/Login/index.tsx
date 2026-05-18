@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useLogin } from '../../hooks/useLogin'
 import styles from '../Auth.module.css'
 
 type FieldProps = {
@@ -8,6 +10,9 @@ type FieldProps = {
   name: string
   autoComplete: string
   placeholder: string
+  value: string
+  onChange: (value: string) => void
+  disabled?: boolean
 }
 
 const Field = ({
@@ -17,6 +22,9 @@ const Field = ({
   name,
   autoComplete,
   placeholder,
+  value,
+  onChange,
+  disabled,
 }: FieldProps) => (
   <div className={styles.field}>
     <label htmlFor={id} className={styles.label}>
@@ -29,14 +37,27 @@ const Field = ({
       name={name}
       autoComplete={autoComplete}
       placeholder={placeholder}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      disabled={disabled}
+      required
     />
   </div>
 )
 
 const Login = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const login = useLogin()
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    login.mutate({ email, password })
   }
+
+  const formError = login.error?.message ?? null
+  const isSubmitting = login.isPending
 
   return (
     <main className={styles.page}>
@@ -55,6 +76,9 @@ const Login = () => {
             name="email"
             autoComplete="email"
             placeholder="you@example.com"
+            value={email}
+            onChange={setEmail}
+            disabled={isSubmitting}
           />
           <Field
             id="login-password"
@@ -63,9 +87,21 @@ const Login = () => {
             name="password"
             autoComplete="current-password"
             placeholder="••••••••"
+            value={password}
+            onChange={setPassword}
+            disabled={isSubmitting}
           />
-          <button type="submit" className={styles.submit}>
-            Sign in
+          {formError ? (
+            <p className={styles.error} role="alert">
+              {formError}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            className={styles.submit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 

@@ -26,6 +26,11 @@ export type RegisterRequest = {
   password: string
 }
 
+export type LoginRequest = {
+  email: string
+  password: string
+}
+
 export function toPublicUser(user: StoredUser): User {
   return {
     id: user.id,

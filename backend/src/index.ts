@@ -1,24 +1,49 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
+import session from 'express-session'
 import coinPriceRoutes from './routes/coinPriceRoutes.js'
 import dailyInsightsRoutes from './routes/dailyInsightsRoutes.js'
 import funMemeRoutes from './routes/funMemeRoutes.js'
 import marketNewsRoutes from './routes/marketNewsRoutes.js'
-import userRoutes from './routes/userRoutes.js'
+import userRoutes, { protectedUserRoutes } from './routes/userRoutes.js'
 import voteRoutes from './routes/voteRoutes.js'
+import { authMiddleware } from './middleware/authMiddleware.js'
 
 const app = express()
 const port = 3000
 
-app.use(cors())
+const frontendOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173'
+const sessionSecret = process.env.SESSION_SECRET ?? 'dev-session-secret'
+
+app.use(
+  cors({
+    origin: frontendOrigin,
+    credentials: true,
+  }),
+)
 app.use(express.json())
+app.use(
+  session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  }),
+)
+
 app.use('/api/user', userRoutes)
-app.use('/api/coins', coinPriceRoutes)
-app.use('/api/news', marketNewsRoutes)
-app.use('/api/insights', dailyInsightsRoutes)
-app.use('/api/fun-meme', funMemeRoutes)
-app.use('/api/votes', voteRoutes)
+app.use('/api/user', authMiddleware, protectedUserRoutes)
+app.use('/api/coins', authMiddleware, coinPriceRoutes)
+app.use('/api/news', authMiddleware, marketNewsRoutes)
+app.use('/api/insights', authMiddleware, dailyInsightsRoutes)
+app.use('/api/fun-meme', authMiddleware, funMemeRoutes)
+app.use('/api/votes', authMiddleware, voteRoutes)
 
 const server = app.listen(port)
 

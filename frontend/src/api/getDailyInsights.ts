@@ -1,10 +1,11 @@
+import { fetchApi } from './fetchApi'
 import type { DailyInsightsResult } from '../types/dailyInsights'
 
 export async function getDailyInsights(
   coins: string[],
 ): Promise<DailyInsightsResult> {
   const ids = coins.join(',')
-  const response = await fetch(
+  const response = await fetchApi(
     `http://localhost:3000/api/insights?coins=${encodeURIComponent(ids)}`,
   )
 

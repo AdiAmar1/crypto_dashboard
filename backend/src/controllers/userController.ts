@@ -1,7 +1,12 @@
 import type { Request, Response } from 'express'
 import { UserError } from '../errors/userError.js'
-import type { RegisterRequest, UserPreferences } from '../types/user.js'
+import type {
+  LoginRequest,
+  RegisterRequest,
+  UserPreferences,
+} from '../types/user.js'
 import * as userService from '../services/userService.js'
+import { getUserId } from '../utils/getUserId.js'
 
 export async function register(req: Request, res: Response): Promise<void> {
   try {
@@ -18,14 +23,34 @@ export async function register(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function login(_req: Request, res: Response): Promise<void> {
-  const result = await userService.login()
-  res.send(result)
+export async function login(req: Request, res: Response): Promise<void> {
+  try {
+    const body = req.body as LoginRequest
+    const user = await userService.login(body)
+    req.session.userId = user.id
+    res.json(user)
+  } catch (error) {
+    if (error instanceof UserError) {
+      res.status(error.statusCode).json({ error: error.message })
+      return
+    }
+
+    res.status(500).json({ error: 'Failed to sign in' })
+  }
 }
 
-export async function getUserData(_req: Request, res: Response): Promise<void> {
-  const user = await userService.getUserData()
-  res.json(user)
+export async function getUserData(req: Request, res: Response): Promise<void> {
+  try {
+    const user = await userService.getUserData(getUserId(req))
+    res.json(user)
+  } catch (error) {
+    if (error instanceof UserError) {
+      res.status(error.statusCode).json({ error: error.message })
+      return
+    }
+
+    res.status(500).json({ error: 'Failed to fetch user data' })
+  }
 }
 
 export async function savePreferences(

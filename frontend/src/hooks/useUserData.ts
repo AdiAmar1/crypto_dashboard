@@ -10,5 +10,6 @@ export function useUserData() {
     queryKey: userDataQueryKey,
     queryFn: getUserData,
     staleTime: STALE_TIME_MS,
+    retry: false,
   })
 }
