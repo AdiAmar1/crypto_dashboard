@@ -6,6 +6,7 @@ import dailyInsightsRoutes from './routes/dailyInsightsRoutes.js'
 import funMemeRoutes from './routes/funMemeRoutes.js'
 import marketNewsRoutes from './routes/marketNewsRoutes.js'
 import userRoutes from './routes/userRoutes.js'
+import voteRoutes from './routes/voteRoutes.js'
 
 const app = express()
 const port = 3000
@@ -17,6 +18,7 @@ app.use('/api/coins', coinPriceRoutes)
 app.use('/api/news', marketNewsRoutes)
 app.use('/api/insights', dailyInsightsRoutes)
 app.use('/api/fun-meme', funMemeRoutes)
+app.use('/api/votes', voteRoutes)
 
 const server = app.listen(port)
 

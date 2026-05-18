@@ -1,5 +1,5 @@
 import { useMarketNews } from '../../hooks/useMarketNews'
-import VoteControls from '../VoteControls'
+import SnapshotVote from '../SnapshotVote'
 import MarketNewsList from './MarketNewsList'
 import styles from './MarketNews.module.css'
 
@@ -13,7 +13,7 @@ const MarketNews = ({ coins }: MarketNewsProps) => {
   return (
     <section className={styles.container}>
       {data?.snapshotId && (
-        <VoteControls snapshotId={data.snapshotId} ariaLabel="Rate market news" />
+        <SnapshotVote snapshotId={data.snapshotId} ariaLabel="Rate market news" />
       )}
 
       <header className={styles.header}>

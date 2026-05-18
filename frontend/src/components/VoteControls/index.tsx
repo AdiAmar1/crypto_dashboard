@@ -1,8 +1,11 @@
-import { useVoteSnapshot } from '../../hooks/useVoteSnapshot'
 import styles from './VoteControls.module.css'
 
 type VoteControlsProps = {
-  snapshotId: string
+  hasUpvoted: boolean
+  hasDownvoted: boolean
+  onUpvote: () => void
+  onDownvote: () => void
+  isPending?: boolean
   ariaLabel?: string
 }
 
@@ -25,40 +28,37 @@ const ThumbDownIcon = () => (
 )
 
 const VoteControls = ({
-  snapshotId,
+  hasUpvoted,
+  hasDownvoted,
+  onUpvote,
+  onDownvote,
+  isPending = false,
   ariaLabel = 'Rate this content',
-}: VoteControlsProps) => {
-  const { hasUpvoted, hasDownvoted, upvote, downvote, isPending } =
-    useVoteSnapshot(snapshotId)
-
-  if (!snapshotId) return null
-
-  return (
-    <div className={styles.controls} role="group" aria-label={ariaLabel}>
-      <button
-        type="button"
-        className={styles.btn}
-        data-active={hasUpvoted || undefined}
-        aria-pressed={hasUpvoted}
-        aria-label="Thumbs up"
-        disabled={isPending}
-        onClick={upvote}
-      >
-        <ThumbUpIcon />
-      </button>
-      <button
-        type="button"
-        className={`${styles.btn} ${styles.btnDown}`}
-        data-active={hasDownvoted || undefined}
-        aria-pressed={hasDownvoted}
-        aria-label="Thumbs down"
-        disabled={isPending}
-        onClick={downvote}
-      >
-        <ThumbDownIcon />
-      </button>
-    </div>
-  )
-}
+}: VoteControlsProps) => (
+  <div className={styles.controls} role="group" aria-label={ariaLabel}>
+    <button
+      type="button"
+      className={styles.btn}
+      data-active={hasUpvoted || undefined}
+      aria-pressed={hasUpvoted}
+      aria-label="Thumbs up"
+      disabled={isPending}
+      onClick={onUpvote}
+    >
+      <ThumbUpIcon />
+    </button>
+    <button
+      type="button"
+      className={`${styles.btn} ${styles.btnDown}`}
+      data-active={hasDownvoted || undefined}
+      aria-pressed={hasDownvoted}
+      aria-label="Thumbs down"
+      disabled={isPending}
+      onClick={onDownvote}
+    >
+      <ThumbDownIcon />
+    </button>
+  </div>
+)
 
 export default VoteControls

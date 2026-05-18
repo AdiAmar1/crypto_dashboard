@@ -1,5 +1,5 @@
 import { useFunMeme } from '../../hooks/useFunMeme'
-import VoteControls from '../VoteControls'
+import SnapshotVote from '../SnapshotVote'
 import styles from './FunMeme.module.css'
 
 const FunMeme = () => {
@@ -8,7 +8,7 @@ const FunMeme = () => {
   return (
     <section className={styles.container}>
       {data?.snapshotId && (
-        <VoteControls snapshotId={data.snapshotId} ariaLabel="Rate this meme" />
+        <SnapshotVote snapshotId={data.snapshotId} ariaLabel="Rate this meme" />
       )}
 
       <header className={styles.header}>

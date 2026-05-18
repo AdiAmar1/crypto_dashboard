@@ -1,5 +1,5 @@
 import { useDailyInsights } from '../../hooks/useDailyInsights'
-import VoteControls from '../VoteControls'
+import SnapshotVote from '../SnapshotVote'
 import InsightContent from './InsightContent'
 import styles from './DailyInsights.module.css'
 
@@ -20,7 +20,7 @@ const DailyInsights = ({ coins }: DailyInsightsProps) => {
   return (
     <section className={styles.container}>
       {data?.snapshotId && (
-        <VoteControls
+        <SnapshotVote
           snapshotId={data.snapshotId}
           ariaLabel="Rate daily insights"
         />

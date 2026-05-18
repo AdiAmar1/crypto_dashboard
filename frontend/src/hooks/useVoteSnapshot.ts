@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postVote } from '../api/postVote'
-
-export const voteSnapshotQueryKey = ['votes', 'snapshot'] as const
+import type { VoteSnapshotResponse } from '../types/vote'
+import { voteSnapshotQueryKey } from './useGetSnapshotVote'
 
 export function useVoteSnapshot(snapshotId: string) {
   const queryClient = useQueryClient()
@@ -13,19 +13,16 @@ export function useVoteSnapshot(snapshotId: string) {
     setHasVoted(false)
   }, [snapshotId])
 
-  const { data: hasUpvoted = false } = useQuery({
-    queryKey,
-    queryFn: () => false,
-    enabled: snapshotId.length > 0,
-    staleTime: Number.POSITIVE_INFINITY,
-  })
-
   const mutation = useMutation({
     mutationFn: (upvoted: boolean) => postVote({ snapshotId, upvoted }),
     onMutate: async (upvoted) => {
       await queryClient.cancelQueries({ queryKey })
-      const previous = queryClient.getQueryData<boolean>(queryKey)
-      queryClient.setQueryData(queryKey, upvoted)
+      const previous = queryClient.getQueryData<VoteSnapshotResponse>(queryKey)
+      queryClient.setQueryData(queryKey, {
+        snapshotId,
+        upvoted,
+        voted: true,
+      })
       setHasVoted(true)
       return { previous }
     },
@@ -35,22 +32,32 @@ export function useVoteSnapshot(snapshotId: string) {
       }
     },
     onSuccess: (result) => {
-      queryClient.setQueryData(queryKey, result.upvoted)
+      queryClient.setQueryData(queryKey, {
+        ...result,
+        voted: true,
+      })
     },
   })
 
   const setUpvoted = (upvoted: boolean) => {
-    if (!snapshotId || mutation.isPending || hasUpvoted === upvoted) return
+    if (!snapshotId || mutation.isPending) return
+
+    const current = queryClient.getQueryData<VoteSnapshotResponse>(queryKey)
+    const hasUpvoted = current?.upvoted ?? false
+    const hasExistingVote = hasVoted || (current?.voted ?? false)
+
+    if (hasExistingVote && hasUpvoted === upvoted) return
+
     mutation.mutate(upvoted)
   }
 
   const toggleUpvote = () => {
-    setUpvoted(!hasUpvoted)
+    const current = queryClient.getQueryData<VoteSnapshotResponse>(queryKey)
+    setUpvoted(!(current?.upvoted ?? false))
   }
 
   return {
-    hasUpvoted,
-    hasDownvoted: hasVoted && !hasUpvoted,
+    hasVoted,
     setUpvoted,
     upvote: () => setUpvoted(true),
     downvote: () => setUpvoted(false),
