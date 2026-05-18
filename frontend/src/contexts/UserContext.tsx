@@ -4,9 +4,8 @@ import {
   useContext,
   type ReactNode,
 } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { useUserData, userDataQueryKey } from '../hooks/useUserData'
+import { useLogout } from '../hooks/useLogout'
+import { useUserData } from '../hooks/useUserData'
 import type { User } from '../types/user'
 
 type UserContextValue = {
@@ -20,13 +19,11 @@ const UserContext = createContext<UserContextValue | null>(null)
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading, isError } = useUserData()
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  const logoutMutation = useLogout()
 
   const logout = useCallback(() => {
-    queryClient.removeQueries({ queryKey: userDataQueryKey })
-    navigate('/login')
-  }, [queryClient, navigate])
+    logoutMutation.mutate()
+  }, [logoutMutation])
 
   return (
     <UserContext.Provider value={{ user, isLoading, isError, logout }}>

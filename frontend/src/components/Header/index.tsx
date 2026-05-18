@@ -2,7 +2,8 @@ import { useUser } from '../../contexts/UserContext'
 import styles from './Header.module.css'
 
 const Header = () => {
-  const { user, isLoading, isError } = useUser()
+  const { user, isLoading, isError, logout } = useUser()
+  const isSignedIn = !isLoading && !isError && Boolean(user)
 
   return (
     <header className={styles.header}>
@@ -21,6 +22,15 @@ const Header = () => {
           <span className={styles.name}>Welcome</span>
         )}
       </p>
+      {isSignedIn && (
+        <button
+          type="button"
+          className={styles.logout}
+          onClick={logout}
+        >
+          Log out
+        </button>
+      )}
     </header>
   )
 }

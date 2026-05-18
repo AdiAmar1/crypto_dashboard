@@ -39,6 +39,25 @@ export async function login(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function logout(req: Request, res: Response): Promise<void> {
+  try {
+    await new Promise<void>((resolve, reject) => {
+      req.session.destroy((err) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        resolve()
+      })
+    })
+
+    res.clearCookie('connect.sid')
+    res.status(204).send()
+  } catch {
+    res.status(500).json({ error: 'Failed to sign out' })
+  }
+}
+
 export async function getUserData(req: Request, res: Response): Promise<void> {
   try {
     const user = await userService.getUserData(getUserId(req))

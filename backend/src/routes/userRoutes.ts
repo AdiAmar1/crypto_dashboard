@@ -8,6 +8,7 @@ router.post('/login', userController.login)
 
 export const protectedUserRoutes = Router()
 
+protectedUserRoutes.post('/logout', userController.logout)
 protectedUserRoutes.get('/data', userController.getUserData)
 protectedUserRoutes.put('/preferences', userController.savePreferences)
 
