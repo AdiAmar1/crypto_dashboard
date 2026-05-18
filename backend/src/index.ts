@@ -10,17 +10,16 @@ import marketNewsRoutes from './routes/marketNewsRoutes.js'
 import userRoutes, { protectedUserRoutes } from './routes/userRoutes.js'
 import voteRoutes from './routes/voteRoutes.js'
 import { authMiddleware } from './middleware/authMiddleware.js'
-import { FRONTEND_ORIGIN, PORT, SERVER_ORIGIN } from './config/app.js'
+import { PORT, SERVER_ORIGIN } from './config/app.js'
 
 const app = express()
 const port = PORT
 
-const frontendOrigin = FRONTEND_ORIGIN
 const sessionSecret = process.env.SESSION_SECRET ?? 'dev-session-secret'
 
 app.use(
   cors({
-    origin: frontendOrigin,
+    origin: true,
     credentials: true,
   }),
 )
