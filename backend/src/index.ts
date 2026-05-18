@@ -1,12 +1,14 @@
-import express, { type Request, type Response } from 'express';
+import cors from 'cors'
+import express from 'express'
+import userRoutes from './routes/userRoutes.js'
 
-const app = express();
-const port = 3000;
+const app = express()
+const port = 3000
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('שלום מהשרת החדש שלי ב-TypeScript!');
-});
+app.use(cors())
+app.use(express.json())
+app.use('/api/user', userRoutes)
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+  console.log(`Server is running on http://localhost:${port}`)
+})
