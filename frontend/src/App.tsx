@@ -1,4 +1,5 @@
 import './App.css'
+import { Navigate } from 'react-router-dom'
 import MarketNews from './components/MarketNews'
 import CoinPrices from './components/CoinPrices'
 import DailyInsights from './components/DailyInsights'
@@ -28,6 +29,10 @@ const App = () => {
         </div>
       </main>
     )
+  }
+
+  if (user?.preferences === null) {
+    return <Navigate to="/onboarding" replace />
   }
 
   return (
