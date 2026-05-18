@@ -1,4 +1,9 @@
 import type { FunMemeResult } from '../types/funMeme.js'
+import { createTtlCache } from '../utils/cache.js'
+
+const CACHE_TTL_MS = 60_000
+const funMemeCache = createTtlCache<FunMemeResult>(CACHE_TTL_MS)
+const CACHE_KEY = 'meme'
 
 const MEME_URLS: string[] = [
   'https://blog.breet.io/wp-content/uploads/2026/02/d751998e0a6ce24e2a0f74276bd5df97.jpg',
@@ -10,6 +15,14 @@ const MEME_URLS: string[] = [
 ]
 
 export async function getFunMeme(): Promise<FunMemeResult> {
+  const cached = funMemeCache.get(CACHE_KEY)
+  if (cached) {
+    return cached
+  }
+
   const index = Math.floor(Math.random() * MEME_URLS.length)
-  return { url: MEME_URLS[index]! }
+  const result: FunMemeResult = { url: MEME_URLS[index]! }
+
+  funMemeCache.set(CACHE_KEY, result)
+  return result
 }

@@ -1,6 +1,7 @@
 import { NEWSDATA_API_KEY, NEWSDATA_BASE_URL } from '../config/newsdata.js'
 import {
   mapNewsdataArticle,
+  type MarketNewsArticle,
   type MarketNewsQuery,
   type MarketNewsResult,
   type NewsdataMarketArticle,
@@ -30,17 +31,48 @@ function articleMatchesCoin(
   return searchTerms.some((term) => text.includes(term.toLowerCase()))
 }
 
-export async function getMarketNews(
-  query: MarketNewsQuery,
+function dedupeArticles(articles: MarketNewsArticle[]): MarketNewsArticle[] {
+  const seen = new Set<string>()
+  return articles.filter((article) => {
+    if (seen.has(article.id)) {
+      return false
+    }
+    seen.add(article.id)
+    return true
+  })
+}
+
+function uniqueCoinQueries(coins: string[]): { rawQuery: string; symbol: string }[] {
+  const seenSymbols = new Set<string>()
+  const result: { rawQuery: string; symbol: string }[] = []
+
+  for (const coin of coins) {
+    const rawQuery = coin.trim()
+    if (!rawQuery) {
+      continue
+    }
+    const symbol = resolveCoinSymbol(rawQuery)
+    if (seenSymbols.has(symbol)) {
+      continue
+    }
+    seenSymbols.add(symbol)
+    result.push({ rawQuery, symbol })
+  }
+
+  return result
+}
+
+async function fetchMarketNewsForCoin(
+  rawQuery: string,
+  symbol: string,
 ): Promise<MarketNewsResult> {
-  const symbol = resolveCoinSymbol(query.q)
   const key = symbol
   const cached = marketNewsCache.get(key)
   if (cached) {
     return cached
   }
 
-  const searchTerms = coinSearchTerms(query.q, symbol)
+  const searchTerms = coinSearchTerms(rawQuery, symbol)
   const params = new URLSearchParams({
     apikey: NEWSDATA_API_KEY,
     coin: symbol,
@@ -76,4 +108,32 @@ export async function getMarketNews(
 
   marketNewsCache.set(key, result)
   return result
+}
+
+export async function getMarketNews(
+  query: MarketNewsQuery,
+): Promise<MarketNewsResult> {
+  const coinQueries = uniqueCoinQueries(query.coins)
+
+  if (coinQueries.length === 0) {
+    return {
+      totalResults: 0,
+      articles: [],
+      nextPage: null,
+    }
+  }
+
+  const results = await Promise.all(
+    coinQueries.map(({ rawQuery, symbol }) =>
+      fetchMarketNewsForCoin(rawQuery, symbol),
+    ),
+  )
+
+  const articles = dedupeArticles(results.flatMap((result) => result.articles))
+
+  return {
+    totalResults: articles.length,
+    articles,
+    nextPage: null,
+  }
 }

@@ -9,7 +9,15 @@ import type {
   OpenRouterChatCompletionRequest,
   OpenRouterChatCompletionResponse,
 } from '../types/dailyInsights.js'
+import { createTtlCache } from '../utils/cache.js'
 import { resolveCoinSymbol } from '../utils/resolveCoinSymbol.js'
+
+const CACHE_TTL_MS = 60_000
+const dailyInsightsCache = createTtlCache<DailyInsightsResult>(CACHE_TTL_MS)
+
+function cacheKey(coins: string[]): string {
+  return [...coins].sort().join(',')
+}
 
 function buildPrompt(coins: string[]): string {
   const coinList = coins.join(', ')
@@ -31,6 +39,12 @@ export async function getDailyInsights(
   request: DailyInsightsRequest,
 ): Promise<DailyInsightsResult> {
   const coins = [...new Set(request.coins.map((coin) => resolveCoinSymbol(coin)))]
+
+  const key = cacheKey(coins)
+  const cached = dailyInsightsCache.get(key)
+  if (cached) {
+    return cached
+  }
 
   const body: OpenRouterChatCompletionRequest = {
     model: OPENROUTER_MODEL,
@@ -76,9 +90,12 @@ export async function getDailyInsights(
     throw new Error('OpenRouter returned an empty insight')
   }
 
-  return {
+  const result: DailyInsightsResult = {
     coins,
     insight,
     generatedAt: new Date().toISOString(),
   }
+
+  dailyInsightsCache.set(key, result)
+  return result
 }

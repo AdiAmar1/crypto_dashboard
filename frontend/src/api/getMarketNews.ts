@@ -1,8 +1,9 @@
 import type { MarketNewsResult } from '../types/marketNews'
 
-export async function getMarketNews(coin: string): Promise<MarketNewsResult> {
+export async function getMarketNews(coins: string[]): Promise<MarketNewsResult> {
+  const q = coins.join(',')
   const response = await fetch(
-    `http://localhost:3000/api/news/crypto?q=${encodeURIComponent(coin)}`,
+    `http://localhost:3000/api/news/crypto?q=${encodeURIComponent(q)}`,
   )
 
   if (!response.ok) {

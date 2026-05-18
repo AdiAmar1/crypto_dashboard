@@ -35,7 +35,7 @@ export interface NewsdataMarketResponse {
 }
 
 export interface MarketNewsQuery {
-  q: string
+  coins: string[]
 }
 
 export function mapNewsdataArticle(
