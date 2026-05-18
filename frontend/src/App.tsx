@@ -57,6 +57,15 @@ const App = () => {
             )
           }
 
+          if (preference === 'DAILY_INSIGHTS') {
+            return (
+              <DailyInsights
+                key={preference}
+                coins={user.preferences.coins}
+              />
+            )
+          }
+
           const Widget = WIDGET_COMPONENTS[preference]
           return <Widget key={preference} />
         })}

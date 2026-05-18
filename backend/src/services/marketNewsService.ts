@@ -66,7 +66,7 @@ export async function getMarketNews(
 
   const articles = (data.results ?? [])
     .filter((article) => articleMatchesCoin(article, symbol, searchTerms))
-    .slice(0, 1)
+    .slice(0, 4)
     .map(mapNewsdataArticle)
   const result: MarketNewsResult = {
     totalResults: articles.length,
