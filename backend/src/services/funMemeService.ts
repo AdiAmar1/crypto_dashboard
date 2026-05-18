@@ -1,8 +1,8 @@
 import type { FunMemeResult } from '../types/funMeme.js'
-import { createTtlCache } from '../utils/cache.js'
+import { createDBCache } from '../utils/dbCache.js'
 
 const CACHE_TTL_MS = 60_000
-const funMemeCache = createTtlCache<{ url: string }>(CACHE_TTL_MS)
+const funMemeCache = createDBCache<{ url: string }>('fun_meme', CACHE_TTL_MS)
 const CACHE_KEY = 'meme'
 
 const MEME_URLS: string[] = [

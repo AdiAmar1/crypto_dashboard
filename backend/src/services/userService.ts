@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { UserError } from '../errors/userError.js'
-import * as userStore from '../store/userStore.js'
+import * as userModel from '../models/userModel.js'
 import type {
   LoginRequest,
   RegisterRequest,
@@ -40,7 +40,7 @@ export async function register(input: RegisterRequest): Promise<User> {
     )
   }
 
-  if (userStore.findByEmail(email)) {
+  if (userModel.findByEmail(email)) {
     throw new UserError('An account with this email already exists', 409)
   }
 
@@ -52,7 +52,7 @@ export async function register(input: RegisterRequest): Promise<User> {
     preferences: null,
   }
 
-  userStore.create(user)
+  userModel.create(user)
 
   return toPublicUser(user)
 }
@@ -72,7 +72,7 @@ export async function login(input: LoginRequest): Promise<User> {
     throw new UserError('Email and password are required', 400)
   }
 
-  const stored = userStore.findByEmail(email)
+  const stored = userModel.findByEmail(email)
   if (!stored || !verifyPassword(password, stored.passwordHash)) {
     throw new UserError('Invalid email or password', 401)
   }
@@ -81,7 +81,7 @@ export async function login(input: LoginRequest): Promise<User> {
 }
 
 export async function getUserData(userId: string): Promise<User> {
-  const stored = userStore.findById(userId)
+  const stored = userModel.findById(userId)
   if (!stored) {
     throw new UserError('User not found', 404)
   }
@@ -93,7 +93,7 @@ export async function savePreferences(
   userId: string,
   preferences: UserPreferences,
 ): Promise<User> {
-  const updated = userStore.updatePreferences(userId, preferences)
+  const updated = userModel.updatePreferences(userId, preferences)
 
   if (!updated) {
     throw new UserError('User not found', 404)

@@ -9,13 +9,13 @@ import type {
   OpenRouterChatCompletionRequest,
   OpenRouterChatCompletionResponse,
 } from '../types/dailyInsights.js'
-import { createTtlCache } from '../utils/cache.js'
+import { createDBCache } from '../utils/dbCache.js'
 import { resolveCoinSymbol } from '../utils/resolveCoinSymbol.js'
 
 const CACHE_TTL_MS = 60_000
-const dailyInsightsCache = createTtlCache<
+const dailyInsightsCache = createDBCache<
   Omit<DailyInsightsResult, 'snapshotId'>
->(CACHE_TTL_MS)
+>('daily_insights', CACHE_TTL_MS)
 
 function cacheKey(coins: string[]): string {
   return [...coins].sort().join(',')

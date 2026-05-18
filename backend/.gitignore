@@ -28,6 +28,9 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
+# SQLite
+data/
+
 # Cache
 *.tsbuildinfo
 .eslintcache

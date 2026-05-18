@@ -7,15 +7,15 @@ import {
   type NewsdataMarketArticle,
   type NewsdataMarketResponse,
 } from '../types/marketNews.js'
-import { createTtlCache, DEFAULT_CACHE_TTL_MS } from '../utils/cache.js'
+import { createDBCache, DEFAULT_CACHE_TTL_MS } from '../utils/dbCache.js'
 import {
   coinSearchTerms,
   resolveCoinSymbol,
 } from '../utils/resolveCoinSymbol.js'
 
-const marketNewsCache = createTtlCache<
+const marketNewsCache = createDBCache<
   Omit<MarketNewsResult, 'snapshotId'>
->(DEFAULT_CACHE_TTL_MS)
+>('market_news', DEFAULT_CACHE_TTL_MS)
 
 function cacheKey(symbols: string[]): string {
   return [...symbols].sort().join(',')

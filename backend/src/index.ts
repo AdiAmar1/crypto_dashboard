@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import './db/database.js'
 import cors from 'cors'
 import express from 'express'
 import session from 'express-session'
