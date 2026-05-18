@@ -7,16 +7,15 @@ import {
   type NewsdataMarketArticle,
   type NewsdataMarketResponse,
 } from '../types/marketNews.js'
-import { createTtlCache } from '../utils/cache.js'
+import { createTtlCache, DEFAULT_CACHE_TTL_MS } from '../utils/cache.js'
 import {
   coinSearchTerms,
   resolveCoinSymbol,
 } from '../utils/resolveCoinSymbol.js'
 
-const CACHE_TTL_MS = 60_000
 const marketNewsCache = createTtlCache<
   Omit<MarketNewsResult, 'snapshotId'>
->(CACHE_TTL_MS)
+>(DEFAULT_CACHE_TTL_MS)
 
 function cacheKey(symbols: string[]): string {
   return [...symbols].sort().join(',')
@@ -129,20 +128,28 @@ export async function getMarketNews(
     return { ...cached.value, snapshotId: cached.snapshotId }
   }
 
-  const articleBatches = await Promise.all(
-    coinQueries.map(({ rawQuery, symbol }) =>
-      fetchMarketNewsForCoin(rawQuery, symbol),
-    ),
-  )
+  try {
+    const articleBatches = await Promise.all(
+      coinQueries.map(({ rawQuery, symbol }) =>
+        fetchMarketNewsForCoin(rawQuery, symbol),
+      ),
+    )
 
-  const articles = dedupeArticles(articleBatches.flat())
+    const articles = dedupeArticles(articleBatches.flat())
 
-  const payload = {
-    totalResults: articles.length,
-    articles,
-    nextPage: null,
+    const payload = {
+      totalResults: articles.length,
+      articles,
+      nextPage: null,
+    }
+
+    const snapshotId = marketNewsCache.set(key, payload)
+    return { ...payload, snapshotId }
+  } catch (error) {
+    const stale = marketNewsCache.getStale(key)
+    if (stale) {
+      return { ...stale.value, snapshotId: stale.snapshotId }
+    }
+    throw error
   }
-
-  const snapshotId = marketNewsCache.set(key, payload)
-  return { ...payload, snapshotId }
 }

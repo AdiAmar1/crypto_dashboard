@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
+export const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000
+
 type CacheEntry<T> = {
   value: T
   snapshotId: string
@@ -11,17 +13,20 @@ export type CacheHit<T> = {
   snapshotId: string
 }
 
-export function createTtlCache<T>(ttlMs: number) {
+export function createTtlCache<T>(ttlMs: number = DEFAULT_CACHE_TTL_MS) {
   const store = new Map<string, CacheEntry<T>>()
 
   return {
     get(key: string): CacheHit<T> | undefined {
       const entry = store.get(key)
-      if (!entry) {
+      if (!entry || Date.now() > entry.expiresAt) {
         return undefined
       }
-      if (Date.now() > entry.expiresAt) {
-        store.delete(key)
+      return { value: entry.value, snapshotId: entry.snapshotId }
+    },
+    getStale(key: string): CacheHit<T> | undefined {
+      const entry = store.get(key)
+      if (!entry) {
         return undefined
       }
       return { value: entry.value, snapshotId: entry.snapshotId }
