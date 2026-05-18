@@ -1,7 +1,55 @@
-import type { User, UserPreferences } from '../types/user.js'
+import { randomUUID } from 'node:crypto'
+import { UserError } from '../errors/userError.js'
+import * as userStore from '../store/userStore.js'
+import type { RegisterRequest, User, UserPreferences } from '../types/user.js'
+import { toPublicUser } from '../types/user.js'
+import { hashPassword } from '../utils/password.js'
 
-export async function register(): Promise<string> {
-  return 'register'
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_PASSWORD_LENGTH = 8
+
+function parseRegisterInput(input: RegisterRequest): RegisterRequest {
+  const name = typeof input.name === 'string' ? input.name.trim() : ''
+  const email =
+    typeof input.email === 'string' ? input.email.trim().toLowerCase() : ''
+  const password = typeof input.password === 'string' ? input.password : ''
+
+  return { name, email, password }
+}
+
+export async function register(input: RegisterRequest): Promise<User> {
+  const { name, email, password } = parseRegisterInput(input)
+
+  if (!name || !email || !password) {
+    throw new UserError('Name, email, and password are required', 400)
+  }
+
+  if (!EMAIL_PATTERN.test(email)) {
+    throw new UserError('Invalid email address', 400)
+  }
+
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    throw new UserError(
+      `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+      400,
+    )
+  }
+
+  if (userStore.findByEmail(email)) {
+    throw new UserError('An account with this email already exists', 409)
+  }
+
+  const user = {
+    id: randomUUID(),
+    name,
+    email,
+    passwordHash: hashPassword(password),
+    preferences: null,
+  }
+
+  userStore.create(user)
+
+  return toPublicUser(user)
 }
 
 export async function login(): Promise<string> {

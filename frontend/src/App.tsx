@@ -4,7 +4,7 @@ import MarketNews from './components/MarketNews'
 import CoinPrices from './components/CoinPrices'
 import DailyInsights from './components/DailyInsights'
 import FunMeme from './components/FunMeme'
-import { useUserData } from './hooks/useUserData'
+import { useUser } from './contexts/UserContext'
 import type { WidgetPreference } from './types/widgetPreference'
 
 const WIDGET_COMPONENTS: Record<
@@ -18,7 +18,7 @@ const WIDGET_COMPONENTS: Record<
 }
 
 const App = () => {
-  const { data: user, isLoading } = useUserData()
+  const { user, isLoading } = useUser()
 
   if (isLoading) {
     return (

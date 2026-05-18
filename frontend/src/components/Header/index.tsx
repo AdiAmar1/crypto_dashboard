@@ -1,8 +1,8 @@
-import { useUserData } from '../../hooks/useUserData'
+import { useUser } from '../../contexts/UserContext'
 import styles from './Header.module.css'
 
 const Header = () => {
-  const { data: user, isLoading, isError } = useUserData()
+  const { user, isLoading, isError } = useUser()
 
   return (
     <header className={styles.header}>
