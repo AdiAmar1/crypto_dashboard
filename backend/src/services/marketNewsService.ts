@@ -16,6 +16,10 @@ import {
 const CACHE_TTL_MS = 60_000
 const marketNewsCache = createTtlCache<MarketNewsResult>(CACHE_TTL_MS)
 
+function cacheKey(symbols: string[]): string {
+  return [...symbols].sort().join(',')
+}
+
 function articleMatchesCoin(
   article: NewsdataMarketArticle,
   symbol: string,
@@ -65,13 +69,7 @@ function uniqueCoinQueries(coins: string[]): { rawQuery: string; symbol: string 
 async function fetchMarketNewsForCoin(
   rawQuery: string,
   symbol: string,
-): Promise<MarketNewsResult> {
-  const key = symbol
-  const cached = marketNewsCache.get(key)
-  if (cached) {
-    return cached
-  }
-
+): Promise<MarketNewsArticle[]> {
   const searchTerms = coinSearchTerms(rawQuery, symbol)
   const params = new URLSearchParams({
     apikey: NEWSDATA_API_KEY,
@@ -96,18 +94,10 @@ async function fetchMarketNewsForCoin(
     throw new Error(data.message ?? 'NewsData.io returned an error')
   }
 
-  const articles = (data.results ?? [])
+  return (data.results ?? [])
     .filter((article) => articleMatchesCoin(article, symbol, searchTerms))
     .slice(0, 4)
     .map(mapNewsdataArticle)
-  const result: MarketNewsResult = {
-    totalResults: articles.length,
-    articles,
-    nextPage: null,
-  }
-
-  marketNewsCache.set(key, result)
-  return result
 }
 
 export async function getMarketNews(
@@ -123,17 +113,27 @@ export async function getMarketNews(
     }
   }
 
-  const results = await Promise.all(
+  const symbols = coinQueries.map(({ symbol }) => symbol)
+  const key = cacheKey(symbols)
+  const cached = marketNewsCache.get(key)
+  if (cached) {
+    return cached
+  }
+
+  const articleBatches = await Promise.all(
     coinQueries.map(({ rawQuery, symbol }) =>
       fetchMarketNewsForCoin(rawQuery, symbol),
     ),
   )
 
-  const articles = dedupeArticles(results.flatMap((result) => result.articles))
+  const articles = dedupeArticles(articleBatches.flat())
 
-  return {
+  const result: MarketNewsResult = {
     totalResults: articles.length,
     articles,
     nextPage: null,
   }
+
+  marketNewsCache.set(key, result)
+  return result
 }
