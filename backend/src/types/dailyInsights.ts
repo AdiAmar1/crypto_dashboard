@@ -3,6 +3,7 @@ export interface DailyInsightsRequest {
 }
 
 export interface DailyInsightsResult {
+  snapshotId: string
   coins: string[]
   insight: string
   generatedAt: string

@@ -1,4 +1,5 @@
 import { useMarketNews } from '../../hooks/useMarketNews'
+import VoteControls from '../VoteControls'
 import MarketNewsList from './MarketNewsList'
 import styles from './MarketNews.module.css'
 
@@ -11,6 +12,10 @@ const MarketNews = ({ coins }: MarketNewsProps) => {
 
   return (
     <section className={styles.container}>
+      {data?.snapshotId && (
+        <VoteControls snapshotId={data.snapshotId} ariaLabel="Rate market news" />
+      )}
+
       <header className={styles.header}>
         <h2 className={styles.title}>Market News</h2>
         <p className={styles.subtitle}>Latest headlines for your tracked coins</p>
@@ -28,11 +33,13 @@ const MarketNews = ({ coins }: MarketNewsProps) => {
         </p>
       )}
 
-      {data && data.length === 0 && (
+      {data && data.articles.length === 0 && (
         <p className={styles.status}>No news articles found for your coins.</p>
       )}
 
-      {data && data.length > 0 && <MarketNewsList articles={data} />}
+      {data && data.articles.length > 0 && (
+        <MarketNewsList articles={data.articles} />
+      )}
     </section>
   )
 }

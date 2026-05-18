@@ -1,6 +1,8 @@
-import type { CoinPrice } from '../types/coinPrice'
+import type { CoinPricesResult } from '../types/coinPrice'
 
-export async function getCoinPrices(coins: string[]): Promise<CoinPrice[]> {
+export async function getCoinPrices(
+  coins: string[],
+): Promise<CoinPricesResult> {
   const ids = coins.join(',')
   const response = await fetch(
     `http://localhost:3000/api/coins/prices?ids=${encodeURIComponent(ids)}`,
@@ -10,5 +12,5 @@ export async function getCoinPrices(coins: string[]): Promise<CoinPrice[]> {
     throw new Error('Failed to fetch coin prices')
   }
 
-  return response.json() as Promise<CoinPrice[]>
+  return response.json() as Promise<CoinPricesResult>
 }

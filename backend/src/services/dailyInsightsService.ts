@@ -13,7 +13,9 @@ import { createTtlCache } from '../utils/cache.js'
 import { resolveCoinSymbol } from '../utils/resolveCoinSymbol.js'
 
 const CACHE_TTL_MS = 60_000
-const dailyInsightsCache = createTtlCache<DailyInsightsResult>(CACHE_TTL_MS)
+const dailyInsightsCache = createTtlCache<
+  Omit<DailyInsightsResult, 'snapshotId'>
+>(CACHE_TTL_MS)
 
 function cacheKey(coins: string[]): string {
   return [...coins].sort().join(',')
@@ -43,7 +45,7 @@ export async function getDailyInsights(
   const key = cacheKey(coins)
   const cached = dailyInsightsCache.get(key)
   if (cached) {
-    return cached
+    return { ...cached.value, snapshotId: cached.snapshotId }
   }
 
   const body: OpenRouterChatCompletionRequest = {
@@ -90,12 +92,12 @@ export async function getDailyInsights(
     throw new Error('OpenRouter returned an empty insight')
   }
 
-  const result: DailyInsightsResult = {
+  const payload = {
     coins,
     insight,
     generatedAt: new Date().toISOString(),
   }
 
-  dailyInsightsCache.set(key, result)
-  return result
+  const snapshotId = dailyInsightsCache.set(key, payload)
+  return { ...payload, snapshotId }
 }

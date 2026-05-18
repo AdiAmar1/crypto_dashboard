@@ -9,6 +9,7 @@ export type MarketNewsArticle = {
 }
 
 export type MarketNewsResult = {
+  snapshotId: string
   totalResults: number
   articles: MarketNewsArticle[]
   nextPage: string | null

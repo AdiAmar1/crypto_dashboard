@@ -8,10 +8,7 @@ const STALE_TIME_MS = 60_000
 export function useMarketNews(coins: string[]) {
   return useQuery({
     queryKey: [...marketNewsQueryKey, coins],
-    queryFn: async () => {
-      const result = await getMarketNews(coins)
-      return result.articles
-    },
+    queryFn: () => getMarketNews(coins),
     enabled: coins.length > 0,
     staleTime: STALE_TIME_MS,
     refetchInterval: STALE_TIME_MS,

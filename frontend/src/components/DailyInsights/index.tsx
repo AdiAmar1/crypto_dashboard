@@ -1,4 +1,5 @@
 import { useDailyInsights } from '../../hooks/useDailyInsights'
+import VoteControls from '../VoteControls'
 import InsightContent from './InsightContent'
 import styles from './DailyInsights.module.css'
 
@@ -18,6 +19,13 @@ const DailyInsights = ({ coins }: DailyInsightsProps) => {
 
   return (
     <section className={styles.container}>
+      {data?.snapshotId && (
+        <VoteControls
+          snapshotId={data.snapshotId}
+          ariaLabel="Rate daily insights"
+        />
+      )}
+
       <header className={styles.header}>
         <h2 className={styles.title}>Daily Insights</h2>
         <p className={styles.subtitle}>AI-generated market summary for your tracked coins</p>

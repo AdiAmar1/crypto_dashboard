@@ -1,0 +1,48 @@
+.controls {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: flex;
+  gap: 0.2rem;
+  z-index: 1;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn[data-active] {
+  border-color: var(--chart-positive);
+  color: var(--chart-positive);
+  background: color-mix(in srgb, var(--chart-positive) 12%, var(--bg));
+}
+
+.btnDown[data-active] {
+  border-color: var(--chart-negative);
+  color: var(--chart-negative);
+  background: color-mix(in srgb, var(--chart-negative) 12%, var(--bg));
+}

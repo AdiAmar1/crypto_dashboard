@@ -8,6 +8,11 @@ export interface CoinPrice {
   marketCap: number
 }
 
+export interface CoinPricesResult {
+  snapshotId: string
+  coins: CoinPrice[]
+}
+
 export interface CoingeckoMarketRow {
   id: string
   symbol: string

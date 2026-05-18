@@ -1,4 +1,5 @@
 import { useCoinsPrices } from '../../hooks/useCoinsPrices'
+import VoteControls from '../VoteControls'
 import CoinPricesChart from './CoinPricesChart'
 import styles from './CoinPrices.module.css'
 
@@ -11,6 +12,10 @@ const CoinPrices = ({ coins }: CoinPricesProps) => {
 
   return (
     <section className={styles.container}>
+      {data?.snapshotId && (
+        <VoteControls snapshotId={data.snapshotId} ariaLabel="Rate coin prices" />
+      )}
+
       <header className={styles.header}>
         <h2 className={styles.title}>Coin Prices</h2>
         <p className={styles.subtitle}>Your tracked coins</p>
@@ -42,7 +47,7 @@ const CoinPrices = ({ coins }: CoinPricesProps) => {
         </p>
       )}
 
-      {data && data.length > 0 && <CoinPricesChart coins={data} />}
+      {data && data.coins.length > 0 && <CoinPricesChart coins={data.coins} />}
     </section>
   )
 }

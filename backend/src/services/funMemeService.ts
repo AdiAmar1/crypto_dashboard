@@ -2,7 +2,7 @@ import type { FunMemeResult } from '../types/funMeme.js'
 import { createTtlCache } from '../utils/cache.js'
 
 const CACHE_TTL_MS = 60_000
-const funMemeCache = createTtlCache<FunMemeResult>(CACHE_TTL_MS)
+const funMemeCache = createTtlCache<{ url: string }>(CACHE_TTL_MS)
 const CACHE_KEY = 'meme'
 
 const MEME_URLS: string[] = [
@@ -17,12 +17,11 @@ const MEME_URLS: string[] = [
 export async function getFunMeme(): Promise<FunMemeResult> {
   const cached = funMemeCache.get(CACHE_KEY)
   if (cached) {
-    return cached
+    return { ...cached.value, snapshotId: cached.snapshotId }
   }
 
   const index = Math.floor(Math.random() * MEME_URLS.length)
-  const result: FunMemeResult = { url: MEME_URLS[index]! }
-
-  funMemeCache.set(CACHE_KEY, result)
-  return result
+  const payload = { url: MEME_URLS[index]! }
+  const snapshotId = funMemeCache.set(CACHE_KEY, payload)
+  return { ...payload, snapshotId }
 }

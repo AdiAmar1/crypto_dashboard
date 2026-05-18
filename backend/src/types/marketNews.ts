@@ -9,6 +9,7 @@ export interface MarketNewsArticle {
 }
 
 export interface MarketNewsResult {
+  snapshotId: string
   totalResults: number
   articles: MarketNewsArticle[]
   nextPage: string | null

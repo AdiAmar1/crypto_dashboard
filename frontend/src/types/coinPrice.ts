@@ -7,3 +7,8 @@ export interface CoinPrice {
   priceChangePercentage24h: number | null
   marketCap: number
 }
+
+export interface CoinPricesResult {
+  snapshotId: string
+  coins: CoinPrice[]
+}

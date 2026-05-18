@@ -14,7 +14,9 @@ import {
 } from '../utils/resolveCoinSymbol.js'
 
 const CACHE_TTL_MS = 60_000
-const marketNewsCache = createTtlCache<MarketNewsResult>(CACHE_TTL_MS)
+const marketNewsCache = createTtlCache<
+  Omit<MarketNewsResult, 'snapshotId'>
+>(CACHE_TTL_MS)
 
 function cacheKey(symbols: string[]): string {
   return [...symbols].sort().join(',')
@@ -106,18 +108,25 @@ export async function getMarketNews(
   const coinQueries = uniqueCoinQueries(query.coins)
 
   if (coinQueries.length === 0) {
-    return {
+    const emptyKey = ''
+    const cachedEmpty = marketNewsCache.get(emptyKey)
+    if (cachedEmpty) {
+      return { ...cachedEmpty.value, snapshotId: cachedEmpty.snapshotId }
+    }
+    const emptyPayload = {
       totalResults: 0,
       articles: [],
       nextPage: null,
     }
+    const snapshotId = marketNewsCache.set(emptyKey, emptyPayload)
+    return { ...emptyPayload, snapshotId }
   }
 
   const symbols = coinQueries.map(({ symbol }) => symbol)
   const key = cacheKey(symbols)
   const cached = marketNewsCache.get(key)
   if (cached) {
-    return cached
+    return { ...cached.value, snapshotId: cached.snapshotId }
   }
 
   const articleBatches = await Promise.all(
@@ -128,12 +137,12 @@ export async function getMarketNews(
 
   const articles = dedupeArticles(articleBatches.flat())
 
-  const result: MarketNewsResult = {
+  const payload = {
     totalResults: articles.length,
     articles,
     nextPage: null,
   }
 
-  marketNewsCache.set(key, result)
-  return result
+  const snapshotId = marketNewsCache.set(key, payload)
+  return { ...payload, snapshotId }
 }

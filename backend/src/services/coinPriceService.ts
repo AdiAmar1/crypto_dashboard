@@ -4,27 +4,29 @@ import {
 } from '../config/coingecko.js'
 import {
   mapCoingeckoMarket,
-  type CoinPrice,
+  type CoinPricesResult,
   type CoingeckoMarketRow,
 } from '../types/coinPrice.js'
 import { createTtlCache } from '../utils/cache.js'
 
 const CACHE_TTL_MS = 60_000
-const coinPricesCache = createTtlCache<CoinPrice[]>(CACHE_TTL_MS)
+const coinPricesCache = createTtlCache<CoinPricesResult['coins']>(CACHE_TTL_MS)
 
 function cacheKey(coinIds: string[]): string {
   return [...coinIds].sort().join(',')
 }
 
-export async function getCoinPrices(coinIds: string[]): Promise<CoinPrice[]> {
+export async function getCoinPrices(
+  coinIds: string[],
+): Promise<CoinPricesResult> {
   if (coinIds.length === 0) {
-    return []
+    return { snapshotId: '', coins: [] }
   }
 
   const key = cacheKey(coinIds)
   const cached = coinPricesCache.get(key)
   if (cached) {
-    return cached
+    return { coins: cached.value, snapshotId: cached.snapshotId }
   }
 
   const params = new URLSearchParams({
@@ -49,6 +51,6 @@ export async function getCoinPrices(coinIds: string[]): Promise<CoinPrice[]> {
   const data = (await response.json()) as CoingeckoMarketRow[]
 
   const coins = data.map(mapCoingeckoMarket)
-  coinPricesCache.set(key, coins)
-  return coins
+  const snapshotId = coinPricesCache.set(key, coins)
+  return { snapshotId, coins }
 }
