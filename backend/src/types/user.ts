@@ -1,8 +1,14 @@
+import type { InvestorType } from './investorType.js'
 import type { WidgetPreference } from './widgetPreference.js'
 
 export type UserPreferences = {
   widgets: WidgetPreference[]
   coins: string[]
+  investorType: InvestorType
+}
+
+export type SavePreferencesRequest = {
+  preferences: UserPreferences
 }
 
 export type User = {

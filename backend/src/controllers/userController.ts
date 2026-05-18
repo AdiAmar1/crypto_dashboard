@@ -3,7 +3,7 @@ import { UserError } from '../errors/userError.js'
 import type {
   LoginRequest,
   RegisterRequest,
-  UserPreferences,
+  SavePreferencesRequest,
 } from '../types/user.js'
 import * as userService from '../services/userService.js'
 import { getUserId } from '../utils/getUserId.js'
@@ -76,7 +76,16 @@ export async function savePreferences(
   req: Request,
   res: Response,
 ): Promise<void> {
-  const preferences = req.body.preferences as UserPreferences
-  const result = await userService.savePreferences(preferences)
-  res.send(result)
+  try {
+    const { preferences } = req.body as SavePreferencesRequest
+    const user = await userService.savePreferences(getUserId(req), preferences)
+    res.json(user)
+  } catch (error) {
+    if (error instanceof UserError) {
+      res.status(error.statusCode).json({ error: error.message })
+      return
+    }
+
+    res.status(500).json({ error: 'Failed to save preferences' })
+  }
 }

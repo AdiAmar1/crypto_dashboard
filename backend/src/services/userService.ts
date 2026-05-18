@@ -90,7 +90,14 @@ export async function getUserData(userId: string): Promise<User> {
 }
 
 export async function savePreferences(
-  _preferences: UserPreferences,
-): Promise<string> {
-  return 'savePreferences'
+  userId: string,
+  preferences: UserPreferences,
+): Promise<User> {
+  const updated = userStore.updatePreferences(userId, preferences)
+
+  if (!updated) {
+    throw new UserError('User not found', 404)
+  }
+
+  return toPublicUser(updated)
 }

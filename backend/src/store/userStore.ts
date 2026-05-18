@@ -17,3 +17,15 @@ export function create(user: StoredUser): void {
   usersById.set(user.id, user)
   userIdByEmail.set(user.email, user.id)
 }
+
+export function updatePreferences(
+  userId: string,
+  preferences: StoredUser['preferences'],
+): StoredUser | undefined {
+  const user = usersById.get(userId)
+  if (!user) return undefined
+
+  const updated: StoredUser = { ...user, preferences }
+  usersById.set(userId, updated)
+  return updated
+}

@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import { useUser } from '../../contexts/UserContext'
 import styles from './Header.module.css'
 
 const Header = () => {
+  const navigate = useNavigate()
   const { user, isLoading, isError, logout } = useUser()
   const isSignedIn = !isLoading && !isError && Boolean(user)
 
@@ -23,13 +25,22 @@ const Header = () => {
         )}
       </p>
       {isSignedIn && (
-        <button
-          type="button"
-          className={styles.logout}
-          onClick={logout}
-        >
-          Log out
-        </button>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.action}
+            onClick={() => navigate('/onboarding')}
+          >
+            Manage
+          </button>
+          <button
+            type="button"
+            className={styles.action}
+            onClick={logout}
+          >
+            Log out
+          </button>
+        </div>
       )}
     </header>
   )
