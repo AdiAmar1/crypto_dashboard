@@ -108,7 +108,7 @@ export async function getMarketNews(
 
   if (coinQueries.length === 0) {
     const emptyKey = ''
-    const cachedEmpty = marketNewsCache.get(emptyKey)
+    const cachedEmpty = await marketNewsCache.get(emptyKey)
     if (cachedEmpty) {
       return { ...cachedEmpty.value, snapshotId: cachedEmpty.snapshotId }
     }
@@ -117,13 +117,13 @@ export async function getMarketNews(
       articles: [],
       nextPage: null,
     }
-    const snapshotId = marketNewsCache.set(emptyKey, emptyPayload)
+    const snapshotId = await marketNewsCache.set(emptyKey, emptyPayload)
     return { ...emptyPayload, snapshotId }
   }
 
   const symbols = coinQueries.map(({ symbol }) => symbol)
   const key = cacheKey(symbols)
-  const cached = marketNewsCache.get(key)
+  const cached = await marketNewsCache.get(key)
   if (cached) {
     return { ...cached.value, snapshotId: cached.snapshotId }
   }
@@ -143,10 +143,10 @@ export async function getMarketNews(
       nextPage: null,
     }
 
-    const snapshotId = marketNewsCache.set(key, payload)
+    const snapshotId = await marketNewsCache.set(key, payload)
     return { ...payload, snapshotId }
   } catch (error) {
-    const stale = marketNewsCache.getStale(key)
+    const stale = await marketNewsCache.getStale(key)
     if (stale) {
       return { ...stale.value, snapshotId: stale.snapshotId }
     }

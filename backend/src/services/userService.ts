@@ -40,7 +40,7 @@ export async function register(input: RegisterRequest): Promise<User> {
     )
   }
 
-  if (userModel.findByEmail(email)) {
+  if (await userModel.findByEmail(email)) {
     throw new UserError('An account with this email already exists', 409)
   }
 
@@ -52,7 +52,7 @@ export async function register(input: RegisterRequest): Promise<User> {
     preferences: null,
   }
 
-  userModel.create(user)
+  await userModel.create(user)
 
   return toPublicUser(user)
 }
@@ -72,7 +72,7 @@ export async function login(input: LoginRequest): Promise<User> {
     throw new UserError('Email and password are required', 400)
   }
 
-  const stored = userModel.findByEmail(email)
+  const stored = await userModel.findByEmail(email)
   if (!stored || !verifyPassword(password, stored.passwordHash)) {
     throw new UserError('Invalid email or password', 401)
   }
@@ -81,7 +81,7 @@ export async function login(input: LoginRequest): Promise<User> {
 }
 
 export async function getUserData(userId: string): Promise<User> {
-  const stored = userModel.findById(userId)
+  const stored = await userModel.findById(userId)
   if (!stored) {
     throw new UserError('User not found', 404)
   }
@@ -93,7 +93,7 @@ export async function savePreferences(
   userId: string,
   preferences: UserPreferences,
 ): Promise<User> {
-  const updated = userModel.updatePreferences(userId, preferences)
+  const updated = await userModel.updatePreferences(userId, preferences)
 
   if (!updated) {
     throw new UserError('User not found', 404)

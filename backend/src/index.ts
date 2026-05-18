@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import './db/database.js'
+import { initDatabase } from './db/database.js'
 import cors from 'cors'
 import express from 'express'
 import session from 'express-session'
@@ -46,19 +46,28 @@ app.use('/api/insights', authMiddleware, dailyInsightsRoutes)
 app.use('/api/fun-meme', authMiddleware, funMemeRoutes)
 app.use('/api/votes', authMiddleware, voteRoutes)
 
-const server = app.listen(port)
+async function startServer(): Promise<void> {
+  await initDatabase()
 
-server.on('listening', () => {
-  console.log(`Server is running on http://localhost:${port}`)
-})
+  const server = app.listen(port)
 
-server.on('error', (err: NodeJS.ErrnoException) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(
-      `Port ${port} is already in use. Stop the other process on that port, then run npm run dev again.`,
-    )
-  } else {
-    console.error('Failed to start server:', err.message)
-  }
+  server.on('listening', () => {
+    console.log(`Server is running on http://localhost:${port}`)
+  })
+
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(
+        `Port ${port} is already in use. Stop the other process on that port, then run npm run dev again.`,
+      )
+    } else {
+      console.error('Failed to start server:', err.message)
+    }
+    process.exit(1)
+  })
+}
+
+startServer().catch((err: unknown) => {
+  console.error('Failed to initialize database:', err)
   process.exit(1)
 })

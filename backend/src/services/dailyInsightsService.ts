@@ -43,7 +43,7 @@ export async function getDailyInsights(
   const coins = [...new Set(request.coins.map((coin) => resolveCoinSymbol(coin)))]
 
   const key = cacheKey(coins)
-  const cached = dailyInsightsCache.get(key)
+  const cached = await dailyInsightsCache.get(key)
   if (cached) {
     return { ...cached.value, snapshotId: cached.snapshotId }
   }
@@ -98,6 +98,6 @@ export async function getDailyInsights(
     generatedAt: new Date().toISOString(),
   }
 
-  const snapshotId = dailyInsightsCache.set(key, payload)
+  const snapshotId = await dailyInsightsCache.set(key, payload)
   return { ...payload, snapshotId }
 }

@@ -1,25 +1,39 @@
-import { mkdirSync } from 'node:fs'
-import path from 'node:path'
-import Database, { type Database as SqliteDatabase } from 'better-sqlite3'
+import pg from 'pg'
 
-const defaultPath = path.join('data', 'app.sqlite')
-const dbPath = process.env.DATABASE_PATH ?? defaultPath
+const { Pool } = pg
 
-mkdirSync(path.dirname(dbPath), { recursive: true })
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is required')
+}
 
-const db: SqliteDatabase = new Database(dbPath)
+const isLocalDatabase =
+  databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1')
 
-db.pragma('journal_mode = WAL')
-db.pragma('foreign_keys = ON')
+const pool = new Pool({
+  connectionString: databaseUrl,
+  ...(isLocalDatabase ? {} : { ssl: { rejectUnauthorized: false } }),
+})
 
-db.exec(`
+const USERS_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    preferences TEXT
+    preferences JSONB
   );
-`)
+`
 
-export { db }
+export async function initDatabase(): Promise<void> {
+  await pool.query(USERS_TABLE_SQL)
+}
+
+async function query<R extends pg.QueryResultRow = pg.QueryResultRow>(
+  text: string,
+  params?: unknown[],
+): Promise<pg.QueryResult<R>> {
+  return pool.query<R>(text, params)
+}
+
+export { pool, query }

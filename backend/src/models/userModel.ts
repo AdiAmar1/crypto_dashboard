@@ -1,4 +1,4 @@
-import { db } from '../db/database.js'
+import { query } from '../db/database.js'
 import type { StoredUser, UserPreferences } from '../types/user.js'
 
 type UserRow = {
@@ -6,26 +6,8 @@ type UserRow = {
   name: string
   email: string
   password_hash: string
-  preferences: string | null
+  preferences: UserPreferences | null
 }
-
-const selectById = db.prepare<[string], UserRow>(
-  'SELECT id, name, email, password_hash, preferences FROM users WHERE id = ?',
-)
-
-const selectByEmail = db.prepare<[string], UserRow>(
-  'SELECT id, name, email, password_hash, preferences FROM users WHERE email = ? COLLATE NOCASE',
-)
-
-const insertUser = db.prepare<
-  [string, string, string, string, string | null]
->(
-  'INSERT INTO users (id, name, email, password_hash, preferences) VALUES (?, ?, ?, ?, ?)',
-)
-
-const updatePreferencesStmt = db.prepare<[string | null, string]>(
-  'UPDATE users SET preferences = ? WHERE id = ?',
-)
 
 function rowToStoredUser(row: UserRow): StoredUser {
   return {
@@ -33,44 +15,48 @@ function rowToStoredUser(row: UserRow): StoredUser {
     name: row.name,
     email: row.email,
     passwordHash: row.password_hash,
-    preferences: row.preferences
-      ? (JSON.parse(row.preferences) as UserPreferences)
-      : null,
+    preferences: row.preferences,
   }
 }
 
-export function findById(id: string): StoredUser | undefined {
-  const row = selectById.get(id)
+export async function findById(id: string): Promise<StoredUser | undefined> {
+  const result = await query<UserRow>(
+    'SELECT id, name, email, password_hash, preferences FROM users WHERE id = $1',
+    [id],
+  )
+  const row = result.rows[0]
   return row ? rowToStoredUser(row) : undefined
 }
 
-export function findByEmail(email: string): StoredUser | undefined {
-  const row = selectByEmail.get(email)
+export async function findByEmail(
+  email: string,
+): Promise<StoredUser | undefined> {
+  const result = await query<UserRow>(
+    'SELECT id, name, email, password_hash, preferences FROM users WHERE LOWER(email) = LOWER($1)',
+    [email],
+  )
+  const row = result.rows[0]
   return row ? rowToStoredUser(row) : undefined
 }
 
-export function create(user: StoredUser): void {
-  const preferencesJson = user.preferences
-    ? JSON.stringify(user.preferences)
-    : null
-
-  insertUser.run(
-    user.id,
-    user.name,
-    user.email,
-    user.passwordHash,
-    preferencesJson,
+export async function create(user: StoredUser): Promise<void> {
+  await query(
+    `INSERT INTO users (id, name, email, password_hash, preferences)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [user.id, user.name, user.email, user.passwordHash, user.preferences],
   )
 }
 
-export function updatePreferences(
+export async function updatePreferences(
   userId: string,
   preferences: UserPreferences,
-): StoredUser | undefined {
-  const preferencesJson = JSON.stringify(preferences)
-  const result = updatePreferencesStmt.run(preferencesJson, userId)
+): Promise<StoredUser | undefined> {
+  const result = await query('UPDATE users SET preferences = $1 WHERE id = $2', [
+    preferences,
+    userId,
+  ])
 
-  if (result.changes === 0) return undefined
+  if (result.rowCount === 0) return undefined
 
   return findById(userId)
 }

@@ -15,13 +15,13 @@ const MEME_URLS: string[] = [
 ]
 
 export async function getFunMeme(): Promise<FunMemeResult> {
-  const cached = funMemeCache.get(CACHE_KEY)
+  const cached = await funMemeCache.get(CACHE_KEY)
   if (cached) {
     return { ...cached.value, snapshotId: cached.snapshotId }
   }
 
   const index = Math.floor(Math.random() * MEME_URLS.length)
   const payload = { url: MEME_URLS[index]! }
-  const snapshotId = funMemeCache.set(CACHE_KEY, payload)
+  const snapshotId = await funMemeCache.set(CACHE_KEY, payload)
   return { ...payload, snapshotId }
 }

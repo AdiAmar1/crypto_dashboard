@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { db } from '../db/database.js'
+import { query } from '../db/database.js'
 import {
   DEFAULT_CACHE_TTL_MS,
   type CacheHit,
@@ -25,15 +25,22 @@ function assertValidTableName(name: string): string {
   return name
 }
 
-function ensureCacheTable(tableName: string): void {
-  db.exec(`
+async function ensureCacheTable(tableName: string): Promise<void> {
+  await query(`
     CREATE TABLE IF NOT EXISTS ${tableName} (
       cache_key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
       snapshot_id TEXT NOT NULL,
-      expires_at INTEGER NOT NULL
+      expires_at BIGINT NOT NULL
     );
   `)
+}
+
+function rowToHit<T>(row: CacheRow): CacheHit<T> {
+  return {
+    value: JSON.parse(row.value) as T,
+    snapshotId: row.snapshot_id,
+  }
 }
 
 export function createDBCache<T>(
@@ -41,50 +48,51 @@ export function createDBCache<T>(
   ttlMs: number = DEFAULT_CACHE_TTL_MS,
 ) {
   const tableName = assertValidTableName(name)
-  ensureCacheTable(tableName)
+  let tableReady: Promise<void> | undefined
 
-  const selectRow = db.prepare<[string], CacheRow>(
-    `SELECT value, snapshot_id, expires_at FROM ${tableName} WHERE cache_key = ?`,
-  )
-
-  const upsertEntry = db.prepare<[string, string, string, number]>(
-    `INSERT INTO ${tableName} (cache_key, value, snapshot_id, expires_at)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT(cache_key) DO UPDATE SET
-       value = excluded.value,
-       snapshot_id = excluded.snapshot_id,
-       expires_at = excluded.expires_at`,
-  )
-
-  function rowToHit(row: CacheRow): CacheHit<T> {
-    return {
-      value: JSON.parse(row.value) as T,
-      snapshotId: row.snapshot_id,
+  function ready(): Promise<void> {
+    if (!tableReady) {
+      tableReady = ensureCacheTable(tableName)
     }
+    return tableReady
   }
 
   return {
-    get(key: string): CacheHit<T> | undefined {
-      const row = selectRow.get(key)
+    async get(key: string): Promise<CacheHit<T> | undefined> {
+      await ready()
+      const result = await query<CacheRow>(
+        `SELECT value, snapshot_id, expires_at FROM ${tableName} WHERE cache_key = $1`,
+        [key],
+      )
+      const row = result.rows[0]
       if (!row || Date.now() > row.expires_at) {
         return undefined
       }
       return rowToHit(row)
     },
-    getStale(key: string): CacheHit<T> | undefined {
-      const row = selectRow.get(key)
+    async getStale(key: string): Promise<CacheHit<T> | undefined> {
+      await ready()
+      const result = await query<CacheRow>(
+        `SELECT value, snapshot_id, expires_at FROM ${tableName} WHERE cache_key = $1`,
+        [key],
+      )
+      const row = result.rows[0]
       if (!row) {
         return undefined
       }
       return rowToHit(row)
     },
-    set(key: string, value: T): string {
+    async set(key: string, value: T): Promise<string> {
+      await ready()
       const snapshotId = randomUUID()
-      upsertEntry.run(
-        key,
-        JSON.stringify(value),
-        snapshotId,
-        Date.now() + ttlMs,
+      await query(
+        `INSERT INTO ${tableName} (cache_key, value, snapshot_id, expires_at)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (cache_key) DO UPDATE SET
+           value = EXCLUDED.value,
+           snapshot_id = EXCLUDED.snapshot_id,
+           expires_at = EXCLUDED.expires_at`,
+        [key, JSON.stringify(value), snapshotId, Date.now() + ttlMs],
       )
       return snapshotId
     },
