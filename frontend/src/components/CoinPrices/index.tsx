@@ -1,10 +1,48 @@
+import { useCoinsPrices } from '../../hooks/useCoinsPrices'
+import CoinPricesChart from './CoinPricesChart'
 import styles from './CoinPrices.module.css'
 
-const CoinPrices = () => {
+type CoinPricesProps = {
+  coins: string[]
+}
+
+const CoinPrices = ({ coins }: CoinPricesProps) => {
+  const { data, isLoading, isError, error } = useCoinsPrices(coins)
+
   return (
     <section className={styles.container}>
-      <h2 className={styles.title}>Coin Prices</h2>
-      <p className={styles.placeholder}>Live coin prices will appear here.</p>
+      <header className={styles.header}>
+        <h2 className={styles.title}>Coin Prices</h2>
+        <p className={styles.subtitle}>Your tracked coins</p>
+        <ul className={styles.legend} aria-label="Chart legend">
+          <li className={styles.legendItem}>
+            <span className={styles.legendSwatch} data-variant="up" />
+            24h up
+          </li>
+          <li className={styles.legendItem}>
+            <span className={styles.legendSwatch} data-variant="down" />
+            24h down
+          </li>
+          <li className={styles.legendItem}>
+            <span className={styles.legendSwatch} data-variant="neutral" />
+            No data
+          </li>
+        </ul>
+      </header>
+
+      {isLoading && (
+        <p className={styles.status} role="status" aria-live="polite">
+          Loading prices…
+        </p>
+      )}
+
+      {isError && (
+        <p className={styles.error} role="alert">
+          {error instanceof Error ? error.message : 'Could not load coin prices'}
+        </p>
+      )}
+
+      {data && data.length > 0 && <CoinPricesChart coins={data} />}
     </section>
   )
 }

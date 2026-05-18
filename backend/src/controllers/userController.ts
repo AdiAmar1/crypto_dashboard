@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import type { WidgetPreference } from '../types/widgetPreference.js'
+import type { UserPreferences } from '../types/user.js'
 import * as userService from '../services/userService.js'
 
 export async function register(_req: Request, res: Response): Promise<void> {
@@ -21,7 +21,7 @@ export async function savePreferences(
   req: Request,
   res: Response,
 ): Promise<void> {
-  const preferences = req.body.preferences as WidgetPreference[]
+  const preferences = req.body.preferences as UserPreferences
   const result = await userService.savePreferences(preferences)
   res.send(result)
 }

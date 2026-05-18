@@ -1,5 +1,4 @@
-import type { User } from '../types/user.js'
-import type { WidgetPreference } from '../types/widgetPreference.js'
+import type { User, UserPreferences } from '../types/user.js'
 
 export async function register(): Promise<string> {
   return 'register'
@@ -16,12 +15,15 @@ export async function getUserData(): Promise<User> {
     id: '1',
     name: 'Jane Doe',
     email: 'jane@example.com',
-    preferences: ['MARKET_NEWS', 'COIN_PRICES', 'DAILY_INSIGHTS', 'FUN_MEME'],
+    preferences: {
+      widgets: ['MARKET_NEWS', 'COIN_PRICES', 'DAILY_INSIGHTS', 'FUN_MEME'],
+      coins: ['bitcoin'],
+    },
   }
 }
 
 export async function savePreferences(
-  _preferences: WidgetPreference[],
+  _preferences: UserPreferences,
 ): Promise<string> {
   return 'savePreferences'
 }

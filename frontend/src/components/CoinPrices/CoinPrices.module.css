@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   text-align: left;
   padding: 1.25rem;
   border: 1px solid var(--border);
@@ -10,17 +10,119 @@
   box-shadow: var(--shadow);
   min-height: 200px;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .title {
-  margin: 0 0 0.5rem;
+  margin: 0;
   font-size: 1.25rem;
+  line-height: 1.2;
   color: var(--text-h);
 }
 
-.placeholder {
+.subtitle {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.legendSwatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendSwatch[data-variant='up'] {
+  background: var(--chart-positive);
+}
+
+.legendSwatch[data-variant='down'] {
+  background: var(--chart-negative);
+}
+
+.legendSwatch[data-variant='neutral'] {
+  background: var(--chart-neutral);
+}
+
+.status {
   margin: 0;
   color: var(--text);
   font-size: 0.9rem;
   opacity: 0.8;
+}
+
+.error {
+  margin: 0;
+  color: var(--chart-negative);
+  font-size: 0.9rem;
+}
+
+.chartWrap {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--chart-surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+.tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+.tooltip strong {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.tooltipSymbol {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  text-transform: uppercase;
 }

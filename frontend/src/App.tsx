@@ -38,7 +38,16 @@ const App = () => {
   return (
     <main className="dashboard">
       <div className="dashboard-grid">
-        {user?.preferences.map((preference) => {
+        {user?.preferences.widgets.map((preference) => {
+          if (preference === 'COIN_PRICES') {
+            return (
+              <CoinPrices
+                key={preference}
+                coins={user.preferences.coins}
+              />
+            )
+          }
+
           const Widget = WIDGET_COMPONENTS[preference]
           return <Widget key={preference} />
         })}

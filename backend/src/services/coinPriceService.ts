@@ -7,15 +7,29 @@ import {
   type CoinPrice,
   type CoingeckoMarketRow,
 } from '../types/coinPrice.js'
+import { createTtlCache } from '../utils/cache.js'
 
-const DEFAULT_PER_PAGE = 10
+const CACHE_TTL_MS = 60_000
+const coinPricesCache = createTtlCache<CoinPrice[]>(CACHE_TTL_MS)
 
-export async function getCoinPrices(perPage = DEFAULT_PER_PAGE): Promise<CoinPrice[]> {
+function cacheKey(coinIds: string[]): string {
+  return [...coinIds].sort().join(',')
+}
+
+export async function getCoinPrices(coinIds: string[]): Promise<CoinPrice[]> {
+  if (coinIds.length === 0) {
+    return []
+  }
+
+  const key = cacheKey(coinIds)
+  const cached = coinPricesCache.get(key)
+  if (cached) {
+    return cached
+  }
+
   const params = new URLSearchParams({
     vs_currency: 'usd',
-    order: 'market_cap_desc',
-    per_page: String(perPage),
-    page: '1',
+    ids: coinIds.join(','),
     sparkline: 'false',
   })
 
@@ -34,5 +48,7 @@ export async function getCoinPrices(perPage = DEFAULT_PER_PAGE): Promise<CoinPri
 
   const data = (await response.json()) as CoingeckoMarketRow[]
 
-  return data.map(mapCoingeckoMarket)
+  const coins = data.map(mapCoingeckoMarket)
+  coinPricesCache.set(key, coins)
+  return coins
 }
