@@ -12,5 +12,6 @@ export function useCoinsPrices(coins: string[]) {
     enabled: coins.length > 0,
     staleTime: STALE_TIME_MS,
     refetchInterval: STALE_TIME_MS,
+    retry: false,
   })
 }

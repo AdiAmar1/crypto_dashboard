@@ -31,7 +31,7 @@ export async function getCoinPrices(
 
   const params = new URLSearchParams({
     vs_currency: 'usd',
-    ids: coinIds.join(','),
+    symbols: coinIds.join(','),
     sparkline: 'false',
   })
 
