@@ -9,7 +9,7 @@ export function getCoingeckoHeaders(): Record<string, string> {
   }
 
   if (COINGECKO_API_KEY !== '') {
-    headers['x-cg-pro-api-key'] = COINGECKO_API_KEY
+    headers['x-cg-demo-api-key'] = COINGECKO_API_KEY
   }
 
   return headers

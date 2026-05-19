@@ -9,7 +9,7 @@ import {
 } from '../types/coinPrice.js'
 import { createTtlCache } from '../utils/cache.js'
 
-const CACHE_TTL_MS = 60_000
+const CACHE_TTL_MS = 60_0000
 const coinPricesCache = createTtlCache<CoinPricesResult['coins']>(CACHE_TTL_MS)
 
 function cacheKey(coinIds: string[]): string {
