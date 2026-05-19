@@ -10,31 +10,33 @@ import marketNewsRoutes from './routes/marketNewsRoutes.js'
 import userRoutes, { protectedUserRoutes } from './routes/userRoutes.js'
 import voteRoutes from './routes/voteRoutes.js'
 import { authMiddleware } from './middleware/authMiddleware.js'
-import { PORT, SERVER_ORIGIN } from './config/app.js'
+import {
+  FRONTEND_ORIGIN,
+  PORT,
+  SERVER_ORIGIN,
+  SESSION_COOKIE,
+} from './config/app.js'
 
 const app = express()
 const port = PORT
 
-const sessionSecret = process.env.SESSION_SECRET ?? 'dev-session-secret'
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1)
+}
 
 app.use(
   cors({
-    origin: true,
+    origin: FRONTEND_ORIGIN,
     credentials: true,
   }),
 )
 app.use(express.json())
 app.use(
   session({
-    secret: sessionSecret,
+    secret: process.env.SESSION_SECRET ?? 'dev-session-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    },
+    cookie: SESSION_COOKIE,
   }),
 )
 

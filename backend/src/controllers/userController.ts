@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import { SESSION_COOKIE_CLEAR } from '../config/app.js'
 import { UserError } from '../errors/userError.js'
 import type {
   LoginRequest,
@@ -51,7 +52,7 @@ export async function logout(req: Request, res: Response): Promise<void> {
       })
     })
 
-    res.clearCookie('connect.sid')
+    res.clearCookie('connect.sid', SESSION_COOKIE_CLEAR)
     res.status(204).send()
   } catch {
     res.status(500).json({ error: 'Failed to sign out' })
